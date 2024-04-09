@@ -1,5 +1,12 @@
 import clearTerminal from './clearTerminal.js'
-import { MARKERS, POINTER } from './constants.js'
+import { POINTER } from './constants.js'
+import checkbox from '../checkbox.js'
+import radio from '../radio.js'
+
+const components = {
+  checkbox,
+  radio
+}
 
 /**
  * @typedef {Object} DisplayList
@@ -8,29 +15,44 @@ import { MARKERS, POINTER } from './constants.js'
  * @property {number} currentPointer - An array containing selected options, defaults to an empty array if not provided.
  * @property {number[]} selectedOptions - An array containing selected options, defaults to an empty array if not provided.
  * @property {keyof import('./constants.js').Markers} type - The type of data object, defaults to 'list' if not provided.
+ * @property {number} top - The list top position.
+ * @property {number} left - The list left position.
  */
 
 /**
  *
  * @param {DisplayList} config
+ * @returns {string[]}
  */
-
-const displayList = ({ options, message, currentPointer, selectedOptions, type }) => {
+const displayList = ({
+  options,
+  message,
+  currentPointer,
+  selectedOptions,
+  type,
+  left,
+  top
+}) => {
   clearTerminal()
 
-  console.log(`${message}\n`)
+  // cursorTo(process.stdout, left, top)
+  // console.log(`${message}\n`)
 
-  options.forEach((option, index) => {
+  // options.forEach((option, index) => {
+  return options.map((option, index) => {
     const prefix = index === currentPointer ? POINTER : ' '
 
     const formattedOption = [prefix]
 
     const isSelected = selectedOptions.includes(index)
-    formattedOption.push(isSelected ? MARKERS[type].filled : MARKERS[type].empty)
 
-    formattedOption.push(option)
+    // cursorTo(process.stdout, left, top)
+    // console.log(prefix)
+    components[type](option, isSelected, left, top)
+    formattedOption.push(components[type](option, isSelected, left, top))
 
-    console.log(formattedOption.join(' '))
+    // console.log(formattedOption.join(' '))
+    return formattedOption.join(' ')
   })
 }
 

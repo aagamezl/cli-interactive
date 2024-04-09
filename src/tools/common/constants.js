@@ -17,6 +17,8 @@ export const POINTER = '\u276F'
 export const KEYBOARD_KEYS = {
   DOWN: 'down',
   ESCAPE: 'escape',
+  LEFT: 'left',
+  RIGHT: 'right',
   SPACE: 'space',
   UP: 'up'
 }
@@ -29,6 +31,19 @@ export const MARKERS = {
   radio: {
     empty: '\u25CB',
     filled: '\u25C9'
+  }
+}
+
+export const LIST_LAYOUT = {
+  horizontal: {
+    glue: ' ',
+    forward: KEYBOARD_KEYS.RIGHT,
+    backward: KEYBOARD_KEYS.LEFT
+  },
+  vertical: {
+    glue: '\n',
+    forward: KEYBOARD_KEYS.DOWN,
+    backward: KEYBOARD_KEYS.UP
   }
 }
 
