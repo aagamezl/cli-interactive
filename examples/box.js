@@ -1,3 +1,10 @@
 import { box } from '../src/index.js'
 
-console.log(box(0, 0, 10, 20))
+const area = box({
+  left: 15,
+  top: 0,
+  height: 10,
+  width: 20
+})
+
+console.log(area.render())
