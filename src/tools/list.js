@@ -1,11 +1,10 @@
-// @ts-check
-
 import { createInterface, cursorTo } from 'node:readline'
 
 import clearTerminal from './common/clearTerminal.js'
 import closeTerminal from './common/closeTerminal.js'
-import { KEYBOARD_KEYS, LIST_LAYOUT } from './common/constants.js'
-import displayList from './common/displayList.js'
+import { KEYBOARD_KEYS, LIST_LAYOUT, POINTER } from './common/constants.js'
+import checkbox from './checkbox.js'
+import radio from './radio.js'
 
 /**
  * Represents a configuration for a list component.
@@ -16,173 +15,162 @@ import displayList from './common/displayList.js'
  * Configuration object for the list component.
  *
  * @typedef {Object} ListConfig
- * @property {ListOptions} options - An array of strings representing the options for the list.
- * @property {string} message - Message associated with the list.
  * @property {keyof import('./common/constants.js').Markers} type - The list options type.
+ * @property {ListOptions} options - An array of strings representing the options for the list.
  * @property {'horizontal'|'vertical'} layout - The list options type.
- * @property {number} top - The list top position.
- * @property {number} left - The list left position.
+ * @property {number} left
+ * @property {number} top
+ * @property {(selectedOptions: number|number[]) => void} onSelect
  */
+
+/** @typedef {import('./component.js').Component<ListConfig>} ListComponent */
+
+/**
+ * Represents a checkbox object with label and checked status.
+ * @typedef {Object} ChoiceConfig
+ * @property {string} label - The label associated with the checkbox.
+ * @property {boolean} checked - The status of the checkbox, indicating whether it's checked (true) or not (false).
+ */
+
+/**
+ * @typedef {object} Components
+ * @property {Record<string, import('./component.js').Component<ListOptions>>} choice
+ */
+const components = {
+  checkbox,
+  radio
+}
 
 /**
  *
  * @param {ListConfig} config
- * @returns {Promise<number|number[]>}
+ * @returns {ListComponent}
  */
-const list = ({ options, message, type, layout = 'vertical', top, left }) => {
-  return new Promise((resolve) => {
-    // Create readline interface
-    const rl = createInterface({
-      input: process.stdin,
-      output: process.stdout
-    })
+const list = (config) => {
+  // Create readline interface
+  const rl = createInterface({
+    input: process.stdin,
+    output: process.stdout
+  })
 
-    process.stdin.setRawMode(true)
+  // Store previous prompt
+  const previousPrompt = rl.getPrompt()
 
-    // Initial state
-    let currentPointer = 0
+  // Set the current prompt to an empty string
+  rl.setPrompt('')
 
-    /** @type {number[]} */
-    const selectedOptions = []
+  // Initial state
+  let currentPointer = 0
 
-    // Store previous prompt
-    const previousPrompt = rl.getPrompt()
+  /** @type {number[]} */
+  const selectedOptions = []
 
-    // Set the current prompt to an empty string
-    rl.setPrompt('')
+  // Set up input event listeners
 
-    // const displacement = options.reduce((maximum, option) => {
-    //   maximum = option.length > maximum ? option.length : maximum
+  // Handle selection confirmation
+  rl.on('line', () => {
+    clearTerminal()
 
-    //   return maximum
-    // }, 0)
+    closeTerminal(rl, previousPrompt)
 
-    // console.log(displacement)
-    let displacement = 0
+    config.onSelect(config.type === 'radio' ? selectedOptions[0] ?? -1 : selectedOptions.sort())
+  })
 
-    displayList({
-      options,
-      message,
-      currentPointer,
-      selectedOptions,
-      type,
-      left,
-      top
-    }).forEach((component, index) => {
-      if (layout === 'vertical') {
-        cursorTo(process.stdout, left, top + index)
-      } else {
-        // cursorTo(process.stdout, left + ((component.length + 4) * index), top)
-        cursorTo(process.stdout, left + displacement, top)
+  // Capture CTRL + C
+  rl.on('SIGINT', () => {
+    closeTerminal(rl, previousPrompt)
+  })
+
+  rl.on('SIGTSTP', () => {
+    console.log('SIGTSTP')
+    closeTerminal(rl, previousPrompt)
+  })
+
+  // Start reading input
+  rl.prompt()
+
+  process.stdin.on('keypress', (_, key) => {
+    const FORWARD_KEY = LIST_LAYOUT[config.layout].forward
+    const BACKWARD_KEY = LIST_LAYOUT[config.layout].backward
+
+    switch (key.name) {
+      case FORWARD_KEY: {
+        currentPointer = (currentPointer + 1) % config.options.length
+
+        break
       }
 
-      displacement += component.length + 1
+      case KEYBOARD_KEYS.ESCAPE: {
+        closeTerminal(rl, previousPrompt)
 
-      console.log(component)
-    })
-    /* .join(LIST_LAYOUT[layout].glue) */
+        break
+      }
 
-    // console.log(displacement)
+      case KEYBOARD_KEYS.SPACE: {
+        switch (config.type) {
+          case 'checkbox': {
+            const isSelected = selectedOptions.includes(currentPointer)
 
-    const FORWARD_KEY = LIST_LAYOUT[layout].forward
-    const BACKWARD_KEY = LIST_LAYOUT[layout].backward
-
-    // Set up input event listeners
-    process.stdin.on('keypress', (_, key) => {
-      switch (key.name) {
-        case FORWARD_KEY: {
-          currentPointer = (currentPointer + 1) % options.length
-
-          break
-        }
-
-        case KEYBOARD_KEYS.ESCAPE: {
-          closeTerminal(rl, previousPrompt)
-
-          break
-        }
-
-        case KEYBOARD_KEYS.SPACE: {
-          switch (type) {
-            case 'checkbox': {
-              const isSelected = selectedOptions.includes(currentPointer)
-
-              if (isSelected) {
-                const optionIndex = selectedOptions.indexOf(currentPointer)
-                selectedOptions.splice(optionIndex, 1)
-              } else {
-                selectedOptions.push(currentPointer)
-              }
-
-              break
-            }
-
-            case 'radio': {
-              selectedOptions.pop()
+            if (isSelected) {
+              const optionIndex = selectedOptions.indexOf(currentPointer)
+              selectedOptions.splice(optionIndex, 1)
+            } else {
               selectedOptions.push(currentPointer)
             }
+
+            break
           }
 
-          break
+          case 'radio': {
+            selectedOptions.pop()
+            selectedOptions.push(currentPointer)
+          }
         }
 
-        case BACKWARD_KEY: {
-          currentPointer = (currentPointer - 1 + options.length) % options.length
-
-          break
-        }
-
-        default:
-          break
+        break
       }
 
-      displacement = 0
+      case BACKWARD_KEY: {
+        currentPointer = (currentPointer - 1 + config.options.length) % config.options.length
 
-      displayList({
-        options,
-        message,
-        currentPointer,
-        selectedOptions,
-        type,
-        left,
-        top
-      }).forEach((component, index) => {
-        if (layout === 'vertical') {
-          cursorTo(process.stdout, left, top + index)
+        break
+      }
+
+      default:
+        break
+    }
+
+    component.render()
+  })
+
+  /** @type{ListComponent} */
+  const component = {
+    // ...config,
+    type: 'list',
+    render: (update) => {
+      const updatedConfig = { ...config, ...update }
+      let displacement = 0
+
+      return updatedConfig.options.map((option, index) => {
+        const prefix = index === currentPointer ? POINTER : ' '
+        const checked = selectedOptions.includes(index)
+        const code = components[config.type]({ label: option, checked }).render()
+
+        if (config.layout === 'vertical') {
+          cursorTo(process.stdout, config.left, config.top + index)
         } else {
-          // cursorTo(process.stdout, left + ((displacement + 5) * index), top)
-          cursorTo(process.stdout, left + displacement, top)
+          cursorTo(process.stdout, config.left + displacement, config.top)
         }
 
-        displacement += component.length + 1
+        console.log(prefix + ' ' + code)
+        displacement += code.length + prefix.length + 2
 
-        console.log(component)
-      })
-    })
+        return prefix + ' ' + code
+      }).join('')
+    }
+  }
 
-    // Handle selection confirmation
-    rl.on('line', () => {
-      clearTerminal()
-
-      closeTerminal(rl, previousPrompt)
-      console.log('line')
-
-      return resolve(type === 'radio' ? selectedOptions[0] ?? -1 : selectedOptions.sort())
-    })
-
-    // Capture CTRL + C
-    rl.on('SIGINT', () => {
-      closeTerminal(rl, previousPrompt)
-    })
-
-    rl.on('SIGTSTP', () => {
-      console.log('SIGTSTP')
-      closeTerminal(rl, previousPrompt)
-    })
-
-    // Start reading input
-    rl.prompt()
-  })
+  return component
 }
 
 export default list

@@ -1,19 +1,21 @@
-import { cursorTo } from 'node:readline'
-
 import { MARKERS } from './common/constants.js'
+
+/** @typedef {import('./list.js').ChoiceConfig} ChoiceConfig */
 
 /**
  *
- * @param {string} label
- * @param {boolean} isSelected
- * @param {number} left
- * @param {number} top
- * @returns {string}
+ * @param {ChoiceConfig} config
+ * @returns {import('./component.js').Component<ChoiceConfig>}
  */
-const radio = (label, isSelected, left, top) => {
-  // return `${(isSelected ? MARKERS.radio.filled : MARKERS.radio.empty)} ${label}`
-  cursorTo(process.stdout, left, top)
-  console.log(`${(isSelected ? MARKERS.radio.filled : MARKERS.radio.empty)} ${label}`)
+const radio = (config) => {
+  return {
+    type: 'radio',
+    render: (update) => {
+      const updatedConfig = { ...config, ...update }
+
+      return `${(updatedConfig.checked ? MARKERS.radio.filled : MARKERS.radio.empty)} ${updatedConfig.label}`
+    }
+  }
 }
 
 export default radio

@@ -1,17 +1,21 @@
 import { MARKERS } from './common/constants.js'
 
+/** @typedef {import('./list.js').ChoiceConfig} ChoiceConfig */
+
 /**
  *
- * @param {string} label
- * @param {boolean} isSelected
- * @param {number} left
- * @param {number} top
- * @returns {string}
+ * @param {ChoiceConfig} config
+ * @returns {import('./component.js').Component<ChoiceConfig>}
  */
-const checkbox = (label, isSelected, left, top) => {
-  // cursorTo(process.stdout, left, top)
-  return `${(isSelected ? MARKERS.checkbox.filled : MARKERS.checkbox.empty)} ${label}`
-  // console.log(`${(isSelected ? MARKERS.checkbox.filled : MARKERS.checkbox.empty)} ${label}`)
+const checkbox = (config) => {
+  return {
+    type: 'checkbox',
+    render: (update) => {
+      const updatedConfig = { ...config, ...update }
+
+      return `${(updatedConfig.checked ? MARKERS.checkbox.filled : MARKERS.checkbox.empty)} ${updatedConfig.label}`
+    }
+  }
 }
 
 export default checkbox
