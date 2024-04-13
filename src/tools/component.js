@@ -4,6 +4,7 @@
  * @typedef {Object} Component
  * @property {string} type - The type of the component.
  * @property {(update?: T) => string} render - A render function that takes an update parameter of type T and returns the rendered content as a string.
+ * @property {(left: number, top: number) => void} display
  */
 
 /**
@@ -16,7 +17,8 @@ const component = (config) => {
     type: 'component',
     render: (update) => {
       return ''
-    }
+    },
+    display: (left, top) => { }
   }
 }
 
