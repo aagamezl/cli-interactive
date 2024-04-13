@@ -145,7 +145,6 @@ const list = (config) => {
 
   /** @type{ListComponent} */
   const component = {
-    // ...config,
     type: 'list',
     render: (update) => {
       const updatedConfig = { ...config, ...update }
@@ -167,6 +166,11 @@ const list = (config) => {
 
         return prefix + ' ' + code
       }).join('')
+    },
+    display: (left, top) => {
+      cursorTo(process.stdout, left, top)
+
+      console.log(component.render())
     }
   }
 
