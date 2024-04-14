@@ -17,21 +17,14 @@ import { randomHexColor } from './colors.js'
  */
 
 /**
- * @extends import('./component.js').Component<SpinnerConfig>
- * @typedef {Object} SpinnerComponent1
- * @property {() => void} start
- * @property {() => void} stop
- */
-
-/**
- * @typedef {Object} BaseSpinner
+ * @typedef {Object} BaseSpinnerComponent
  * @property {() => void} start
  * @property {() => void} stop
  */
 
 /**
  * Represents a spinner component with spinner configuration and additional start and stop methods.
- * @typedef {import('./component.js').Component<SpinnerConfig> & BaseSpinner} SpinnerComponent
+ * @typedef {import('./component.js').Component<SpinnerConfig> & BaseSpinnerComponent} SpinnerComponent
  */
 
 /** @type {Record<string, string[]>} */
