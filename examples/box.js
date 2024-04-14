@@ -1,3 +1,13 @@
 import { box } from '../src/index.js'
 
-console.log(box(0, 0, 10, 20))
+const area = box({
+  height: 10,
+  width: 20,
+  // title: 'Licenses'
+  children: [
+    { render: () => 'some label' },
+    { render: () => 'some other label' }
+  ]
+})
+
+console.log(area.render())
