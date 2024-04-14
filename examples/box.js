@@ -1,10 +1,13 @@
 import { box } from '../src/index.js'
 
 const area = box({
-  left: 15,
-  top: 0,
   height: 10,
-  width: 20
+  width: 20,
+  // title: 'Licenses'
+  children: [
+    { render: () => 'some label' },
+    { render: () => 'some other label' }
+  ]
 })
 
 console.log(area.render())

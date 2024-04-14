@@ -1,11 +1,10 @@
-import { createInterface, cursorTo } from 'node:readline'
+import writeTo from './common/writeTo.js'
 
 /**
  * @typedef {object} BoxConfig
- * @property {number} left
- * @property {number} top
- * @property {number} width
  * @property {number} height
+ * @property {number} width
+ * @property {string} [title]
 */
 
 // const getCursorPos = () => new Promise((resolve) => {
@@ -28,42 +27,46 @@ import { createInterface, cursorTo } from 'node:readline'
 //   process.stdout.write(termcodes.cursorGetPosition)
 // })
 
+/** @typedef {import('./component.js').Component<BoxConfig>} BoxComponent */
+
 /**
  *
  * @param {BoxConfig} config
- * @returns {import('./component.js').Component<BoxConfig>}
+ * @returns {BoxComponent}
  */
 const box = (config) => {
-  return {
+  /** @type{BoxComponent} */
+  const component = {
     type: 'box',
     display: (left, top) => {
-
+      writeTo(left, top, component.render())
     },
-    render: (update) => {
+    render: () => {
       const code = []
 
       // Draw the top line
-      code.push(' '.repeat(config.left) + '┌' + '─'.repeat(config.width - 2) + '┐\n')
+      const topLine = '┌' + '─'.repeat(config.width - 2) + '┐'
+
+      // If title is defined, add title to the box
+      if (config.title) {
+        code.push(topLine.slice(0, 2) + ' ' + config.title + ' ' + topLine.slice(config.title.length + 4))
+      } else {
+        code.push(topLine)
+      }
 
       // Draw the vertical lines and spaces in between
       for (let row = 1; row < config.height - 1; row++) {
-        cursorTo(process.stdout, config.left, config.top + row)
-        code.push(' '.repeat(config.left) + '│' + ' '.repeat(config.width - 2) + '│\n')
+        code.push('│' + ' '.repeat(config.width - 2) + '│')
       }
 
-      // console.log(rl.getCursorPos())
-
-      // cursorTo(process.stdout, config.left, config.top)
-
       // Draw the bottom line
-      code.push(' '.repeat(config.left) + '└' + '─'.repeat(config.width - 2) + '┘\n')
+      code.push('└' + '─'.repeat(config.width - 2) + '┘')
 
-      // console.log(result)
-
-      // return result
-      return code.join('')
+      return code.join('\n')
     }
   }
+
+  return component
 }
 
 export default box
