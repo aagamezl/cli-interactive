@@ -1,11 +1,13 @@
 import { clearScreenDown, cursorTo } from 'node:readline'
 
+import hideCursor from './hide-cursor.js'
+
 /**
  * Function to clear the terminal
  *
  */
 const clearTerminal = () => {
-  process.stderr.write('\x1B[?25l') // Hide terminal cursor
+  hideCursor()
 
   cursorTo(process.stdout, 0, 0)
   clearScreenDown(process.stdout)

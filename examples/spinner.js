@@ -6,11 +6,11 @@ const loadSpinner = spinner({
   // type: 'braile-circle-worm',
   // type: 'arc',
   // type: 'braile-circle-hole',
-  // type: 'braille-bouncing-ball',
+  type: 'braille-bouncing-ball',
   // type: 'braille-coveyer-belt',
   // type: 'braille-up-down',
   // type: 'braile-bounce-worm',
-  type: 'braile-stacking',
+  // type: 'braile-stacking',
   speed: 120
 })
 

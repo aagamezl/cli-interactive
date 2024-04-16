@@ -1,10 +1,14 @@
-import { createInterface, cursorTo } from 'node:readline'
+// import { createInterface } from 'node:readline'
 
-import clearTerminal from './common/clearTerminal.js'
-import closeTerminal from './common/closeTerminal.js'
-import { KEYBOARD_KEYS, LIST_LAYOUT, POINTER } from './common/constants.js'
 import checkbox from './checkbox.js'
+// import clearTerminal from './common/clearTerminal.js'
+// import closeTerminal from './common/closeTerminal.js'
+import hideCursor from './common/hide-cursor.js'
 import radio from './radio.js'
+import writeTo from './common/writeTo.js'
+import { KEYBOARD_KEYS, LIST_LAYOUT, POINTER } from './common/constants.js'
+import { addEventListener } from './common/events.js'
+import activateMouse from './activate-mouse.js'
 
 /**
  * Represents a configuration for a list component.
@@ -18,8 +22,6 @@ import radio from './radio.js'
  * @property {keyof import('./common/constants.js').Markers} type - The list options type.
  * @property {ListOptions} options - An array of strings representing the options for the list.
  * @property {'horizontal'|'vertical'} layout - The list options type.
- * @property {number} left
- * @property {number} top
  * @property {(selectedOptions: number|number[]) => void} onSelect
  */
 
@@ -48,16 +50,19 @@ const components = {
  */
 const list = (config) => {
   // Create readline interface
-  const rl = createInterface({
-    input: process.stdin,
-    output: process.stdout
-  })
+  // const rl = createInterface({
+  //   input: process.stdin,
+  //   output: process.stdout
+  // })
 
   // Store previous prompt
-  const previousPrompt = rl.getPrompt()
+  // const previousPrompt = rl.getPrompt()
 
   // Set the current prompt to an empty string
-  rl.setPrompt('')
+  // rl.setPrompt('')
+  hideCursor()
+
+  activateMouse()
 
   // Initial state
   let currentPointer = 0
@@ -65,31 +70,37 @@ const list = (config) => {
   /** @type {number[]} */
   const selectedOptions = []
 
-  // Set up input event listeners
+  // let displayLeft = -1
+  // let displayTop = -1
 
   // Handle selection confirmation
-  rl.on('line', () => {
-    clearTerminal()
+  // rl.on('line', () => {
+  //   clearTerminal()
 
-    closeTerminal(rl, previousPrompt)
+  //   closeTerminal(rl, previousPrompt)
 
-    config.onSelect(config.type === 'radio' ? selectedOptions[0] ?? -1 : selectedOptions.sort())
-  })
+  //   config.onSelect(config.type === 'radio' ? selectedOptions[0] ?? -1 : selectedOptions.sort())
+  // })
 
   // Capture CTRL + C
-  rl.on('SIGINT', () => {
-    closeTerminal(rl, previousPrompt)
-  })
+  // rl.on('SIGINT', () => {
+  //   closeTerminal(rl, previousPrompt)
+  // })
 
-  rl.on('SIGTSTP', () => {
-    console.log('SIGTSTP')
-    closeTerminal(rl, previousPrompt)
-  })
+  // rl.on('SIGTSTP', () => {
+  //   closeTerminal(rl, previousPrompt)
+  // })
 
   // Start reading input
-  rl.prompt()
+  // rl.prompt()
 
-  process.stdin.on('keypress', (_, key) => {
+  // process.stdin.on('keypress', (_, key) => {
+  addEventListener('KEYPRESS', (key) => {
+    // if (isDisplayed === false) {
+    //   return
+    // }
+    // console.log(key)
+
     const FORWARD_KEY = LIST_LAYOUT[config.layout].forward
     const BACKWARD_KEY = LIST_LAYOUT[config.layout].backward
 
@@ -101,7 +112,15 @@ const list = (config) => {
       }
 
       case KEYBOARD_KEYS.ESCAPE: {
-        closeTerminal(rl, previousPrompt)
+        // closeTerminal(rl, previousPrompt)
+        process.exit(0)
+
+        break
+      }
+
+      case KEYBOARD_KEYS.ENTER: {
+        // closeTerminal(rl, previousPrompt)
+        config.onSelect(config.type === 'radio' ? selectedOptions[0] ?? -1 : selectedOptions.sort())
 
         break
       }
@@ -140,37 +159,55 @@ const list = (config) => {
         break
     }
 
-    component.render()
+    // component.display(displayLeft, displayTop)
+    if (component.parent === undefined) {
+      component.display(component.left, component.top)
+    } else {
+      component.parent.display(component.parent.left, component.parent.top)
+    }
   })
 
   /** @type{ListComponent} */
   const component = {
     type: 'list',
+    left: config.left,
+    top: config.top,
     render: (update) => {
       const updatedConfig = { ...config, ...update }
-      let displacement = 0
+      // let displacement = 0
 
       return updatedConfig.options.map((option, index) => {
         const prefix = index === currentPointer ? POINTER : ' '
         const checked = selectedOptions.includes(index)
         const code = components[config.type]({ label: option, checked }).render()
 
-        if (config.layout === 'vertical') {
-          cursorTo(process.stdout, config.left, config.top + index)
-        } else {
-          cursorTo(process.stdout, config.left + displacement, config.top)
-        }
+        // if (config.layout === 'vertical') {
+        //   cursorTo(process.stdout, config.left, config.top + index)
+        // } else {
+        //   cursorTo(process.stdout, config.left + displacement, config.top)
+        // }
 
-        console.log(prefix + ' ' + code)
-        displacement += code.length + prefix.length + 2
+        // console.log(prefix + ' ' + code)
+        // displacement += code.length + prefix.length + 2
 
-        return prefix + ' ' + code
-      }).join('')
+        return prefix + ' ' + code // + LIST_LAYOUT[config.layout].glue
+      }).join('\n')
     },
     display: (left, top) => {
-      cursorTo(process.stdout, left, top)
+      // displayLeft = left
+      // displayTop = top
+      component.left = left
+      component.top = top
 
-      console.log(component.render())
+      let parentLeft = 0
+      let parentTop = 0
+      if (component.parent) {
+        parentLeft = component.parent.left
+        parentTop = component.parent.top
+      }
+
+      // writeTo(displayLeft, displayTop, component.render())
+      writeTo(component.left + parentLeft, component.top + parentTop, component.render())
     }
   }
 

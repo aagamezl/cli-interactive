@@ -2,15 +2,19 @@ import { cursorTo } from 'node:readline'
 
 /**
  *
- * @param {number} [left=0]
- * @param {number} [top=0]
- * @param {string} [message='']
+ * @param {number} left
+ * @param {number} top
+ * @param {string|string[]} message
  * @returns {void}
  */
-const writeTo = (left = 0, top = 0, message = '') => {
-  cursorTo(process.stdout, left, top)
+const writeTo = (left, top, message) => {
+  const lines = typeof message === 'string' ? message.split('\n') : message
 
-  process.stdout.write(message)
+  lines.forEach((line, index) => {
+    cursorTo(process.stdout, left, top + index)
+
+    process.stdout.write(line)
+  })
 }
 
 export default writeTo
