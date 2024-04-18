@@ -1,6 +1,10 @@
-import { cursorTo } from 'readline'
+import { createInterface } from 'readline'
 
+import closeTerminal from './common/closeTerminal.js'
 import format from './format.js'
+import hideCursor from './common/hide-cursor.js'
+import showCursor from './common/show-cursor.js'
+import writeTo from './common/writeTo.js'
 import { randomHexColor } from './colors.js'
 
 // https://en.wikipedia.org/wiki/List_of_Unicode_characters
@@ -57,6 +61,19 @@ const spinner = (config) => {
   let displayLeft = -1
   let displayTop = -1
 
+  // Create readline interface
+  const rl = createInterface({
+    input: process.stdin,
+    output: process.stdout
+  })
+
+  // Store previous prompt
+  const previousPrompt = rl.getPrompt()
+
+  // Set the current prompt to an empty string
+  rl.setPrompt('')
+  hideCursor()
+
   /** @type{SpinnerComponent} */
   const component = {
     type: 'spinner',
@@ -72,7 +89,10 @@ const spinner = (config) => {
       }, config.speed)
     },
     stop: () => {
+      showCursor()
+
       clearInterval(interval)
+      closeTerminal(rl, previousPrompt)
     },
     render: () => {
       return format.hex(randomHexColor())(SPINNER_TYPE[config.type][index])
@@ -81,9 +101,10 @@ const spinner = (config) => {
       displayLeft = left
       displayTop = top
 
-      cursorTo(process.stdout, displayLeft, displayTop)
+      // cursorTo(process.stdout, displayLeft, displayTop)
 
-      console.log(component.render())
+      // console.log(component.render())
+      writeTo(displayLeft, displayTop, component.render())
     }
   }
 

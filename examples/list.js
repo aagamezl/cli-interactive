@@ -6,9 +6,7 @@ const options = ['Munich', 'Barcelona', 'Paris', 'Roma']
 const cities = list({
   options,
   type: 'radio',
-  layout: 'horizontal',
-  left: 20,
-  top: 1,
+  layout: 'vertical',
   onSelect: (selectedOption) => {
     if (Array.isArray(selectedOption)) {
       const selectedOptionNames = selectedOption.length > 0
@@ -24,4 +22,4 @@ const cities = list({
   }
 })
 
-cities.render()
+cities.display(20, 1)

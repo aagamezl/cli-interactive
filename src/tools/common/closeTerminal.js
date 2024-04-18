@@ -1,3 +1,5 @@
+import showCursor from './show-cursor.js'
+
 /**
  * Close the terminal
  *
@@ -5,7 +7,7 @@
  * @param {string} previousPrompt
  */
 const closeTerminal = (rl, previousPrompt) => {
-  // process.stderr.write('\x1B[?25h') // Show terminal cursor
+  showCursor()
 
   rl.setPrompt(previousPrompt) // Restore prompt
   rl.close()

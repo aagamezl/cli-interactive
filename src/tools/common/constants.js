@@ -16,6 +16,7 @@ export const POINTER = '\u276F'
 
 export const KEYBOARD_KEYS = {
   DOWN: 'down',
+  ENTER: 'enter',
   ESCAPE: 'escape',
   LEFT: 'left',
   RIGHT: 'right',
@@ -179,4 +180,11 @@ export const BLOCK_ELEMENTS = {
   QUADRANT_UPPER_RIGHT: '▝', // U+259D
   QUADRANT_UPPER_RIGHT_LOWER_LEFT: '▞', // U+259E
   QUADRANT_UPPER_RIGHT_LOWER_LEFT_LOWER_RIGHT: '▟' // U+259F
+}
+
+export const ARROWS = {
+  UP: '▲',
+  DOWN: '▼',
+  LEFT: '◀',
+  RIGHT: '▶'
 }

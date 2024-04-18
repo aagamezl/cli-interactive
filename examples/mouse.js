@@ -1,6 +1,9 @@
 // // Based on:
 // //    http://groups.google.com/group/nodejs-dev/browse_thread/thread/a0c23008029e5fa7
 
+// import { cursorTo } from 'node:readline'
+// import { dispatchEvent } from '../src/tools/common/events.js'
+
 // process.stdin.resume()
 
 // process.stdin.on('data', function (b) {
@@ -10,9 +13,6 @@
 //     process.stdin.pause()
 //   } else if (/^\u001b\[M/.test(s)) {
 //     // mouse event
-//     console.error('s.length:', s.length)
-//     // reuse the key array albeit its name
-//     // otherwise recompute as the mouse event is structured differently
 //     const modifier = s.charCodeAt(3)
 //     const key = {}
 //     key.shift = !!(modifier & 4)
@@ -20,12 +20,16 @@
 //     key.ctrl = !!(modifier & 16)
 //     key.x = s.charCodeAt(4) - 32
 //     key.y = s.charCodeAt(5) - 32
-//     key.button = null
+//     key.button = ''
 //     key.sequence = s
-//     key.buf = Buffer(key.sequence)
+//     key.name = ''
+//     // key.buf = Buffer(key.sequence)
+
 //     if ((modifier & 96) === 96) {
 //       key.name = 'scroll'
 //       key.button = modifier & 1 ? 'down' : 'up'
+
+//       dispatchEvent('MOUSE:SCROLL', key)
 //     } else {
 //       key.name = modifier & 64 ? 'move' : 'click'
 //       switch (modifier & 3) {
@@ -35,11 +39,18 @@
 //         case 3: key.button = 'none'; break
 //         default: return
 //       }
+
+//       const EVENT = `MOUSE:${key.name}`.toUpperCase()
+
+//       dispatchEvent(EVENT, key)
 //     }
-//     console.error(key)
+
+//     // cursorTo(process.stdout, 0, 0)
+//     // console.error(key)
+//     // process.stdout.write(key)
 //   } else {
 //     // something else...
-//     console.error(0, s, b)
+//     // console.error(0, s, b)
 //   }
 // })
 
