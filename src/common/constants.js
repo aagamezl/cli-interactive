@@ -24,6 +24,7 @@ export const KEYBOARD_KEYS = {
   UP: 'up'
 }
 
+/** @type {Markers} */
 export const MARKERS = {
   checkbox: {
     empty: '\u2610',
