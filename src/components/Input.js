@@ -4,7 +4,7 @@ import Element from './Element.js'
  * @typedef {object} InputAttributes
  * @property {string} label
  * @property {string} [name]
- * @property {unknown} value
+ * @property {unknown} [value]
  */
 
 /**

@@ -46,7 +46,10 @@ const writeTo = (left, top, message) => {
   lines.forEach((line, index) => {
     cursorTo(process.stdout, left, top + index)
 
-    process.stdout.write(line)
+    // If we don’t put the break line at the end we will get a weird character
+    // after our string.
+    // https://www.geeksforgeeks.org/difference-between-process-stdout-write-and-console-log-in-node-js/
+    process.stdout.write(`${line}\r`)
   })
 }
 

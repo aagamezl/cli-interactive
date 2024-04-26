@@ -13,6 +13,11 @@ export default class Element {
   #left = 0
 
   /**
+ * @type {boolean}
+ */
+  hasFocus = false
+
+  /**
    * @type {number}
    * @access private
    */
